@@ -20,9 +20,10 @@ server.use(function(req, res, next){
   next();
 });
 
-var CATALOG_SERVICE_FULL_URL = process.env.CATALOG_SERVICE_URL;
+var CATALOG_SERVICE_FULL_URL = process.env.CATALOG_SERVICE_URL + '/products/_all_docs?include_docs=true';
 var RETRY_TIMEOUT =  parseInt(process.env.RETRY_TIMEOUT) || 5000;
 var CONTRACT_TIMEOUT = parseInt(process.env.CONTRACT_TIMEOUT) || 60000;
+var HOOK_URLS = process.env.HOOK_URLS.split(',');
 
 var catalogItems = [];
 var catalogServiceBreaker = new CircuitBreaker({
@@ -33,6 +34,8 @@ var catalogServiceBreaker = new CircuitBreaker({
 
 //init periodic replication
 retryReplicate(CATALOG_SERVICE_FULL_URL);
+push();
+
 
 server.get('/contracts/:key?', function(req, res){
   var contract = cache.get(req.params.key);
@@ -118,4 +121,41 @@ function retryReplicate(CATALOG_SERVICE_FULL_URL){
       retryReplicate(CATALOG_SERVICE_FULL_URL);
     }, RETRY_TIMEOUT);  
   });  
+}
+
+function push(){
+  setInterval(function(){
+
+    cache.keys().forEach(function(key){
+
+      HOOK_URLS.forEach(function(url){
+        
+        var value = cache.get(key);
+        if(!value) return;
+        
+        //avoid duplicates via explicit id
+        value._id = value.cartId;
+
+        callWebhook(url, key, value);
+      });
+      
+    });
+
+  }, 2000);
+}
+
+function callWebhook(path, key, value){
+  request
+    .post(path)
+    .set('Content-Type', 'application/json')
+    .timeout(2000)
+    .send(value)
+    .q()
+    .then(function(result){
+      cache.del(key);
+      console.log(path + ' - webhook successful');
+    })
+    .fail(function(error){
+      console.log({message: path + ' - webhook failure', error: error.message});
+    });
 }
