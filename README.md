@@ -22,8 +22,8 @@ export LOG="true"
 ##Publish into private registry
 
 ```
-docker tag contract-service 46.101.191.124:5000/contract-service:0.0.5
-docker push 46.101.191.124:5000/contract-service:0.0.5
+docker tag contract-service 46.101.191.124:5000/contract-service:0.0.6
+docker push 46.101.191.124:5000/contract-service:0.0.6
 ```
 
 ##Deploy via Shipyard
@@ -34,7 +34,7 @@ curl -X POST \
 -H 'X-Service-Key: pdE4.JVg43HyxCEMWvsFvu6bdFV7LwA7YPii' \
 http://46.101.191.124:8080/api/containers?pull=true \
 -d '{  
-  "name":"46.101.191.124:5000/contract-service:0.0.5",
+  "name":"46.101.191.124:5000/contract-service:0.0.6",
   "cpus":0.1,
   "memory":64,
   "environment":{
@@ -60,7 +60,7 @@ http://46.101.191.124:8080/api/containers?pull=true \
        "container_port":5011
     }
   ],
-  "labels":["docker"],
+  "labels":[],
   "publish":false,
   "privileged":false,
   "restart_policy":{  
@@ -85,7 +85,7 @@ http://localhost:5011/contracts/abc
 ```
 curl -X POST \
 -H 'Content-Type: application/json' \
-http://localhost:5011/contracts/abc \
+http://192.168.59.103:5011/contracts/abc \
 -d '{
   "cart":{
     "total":"0.666"

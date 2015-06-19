@@ -1,6 +1,7 @@
 'use strict';
 
 var express         = require('express');
+var app             = require('./package.json');
 var bodyParser      = require('body-parser');
 var uuid            = require('node-uuid');
 var cache           = require('memory-cache');
@@ -88,7 +89,12 @@ server.get('/replicate', function(req, res){
 });
 
 server.get('/healthcheck', function(req, res){
-  res.send({ message: 'OK'});
+  res.send({ message: 'OK', version: app.version});
+});
+
+server.get('/error', function(req, res){
+  console.log(new Error('Error - shut down'));
+  process.exit(-1);
 });
 
 server.listen(process.env.SERVICE_PORT, function(){
