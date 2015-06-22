@@ -6,9 +6,8 @@
 export SERVICE_PORT=5011
 export CONTRACT_TIMEOUT=60000
 export RETRY_TIMEOUT=5000
-export CATALOG_SERVICE_URL=http://46.101.191.124:5984
+export DISCOVERY_SERVICE_URLS=http://46.101.138.192:8500;http://46.101.191.124:8500
 export HOOK_URLS=http://46.101.191.124:5984/contracts
-export LOG="true"
 ```
 
 ##Build
@@ -22,29 +21,29 @@ export LOG="true"
 ##Publish into private registry
 
 ```
-docker tag contract-service 46.101.191.124:5000/contract-service:0.0.6
-docker push 46.101.191.124:5000/contract-service:0.0.6
+docker tag contract-service 46.101.191.124:5000/contract-service:0.0.7
+docker push 46.101.191.124:5000/contract-service:0.0.7
 ```
 
 ##Deploy via Shipyard
 
+###OSX/Linux
 ```
 curl -X POST \
 -H 'Content-Type: application/json' \
 -H 'X-Service-Key: pdE4.JVg43HyxCEMWvsFvu6bdFV7LwA7YPii' \
 http://46.101.191.124:8080/api/containers?pull=true \
 -d '{  
-  "name":"46.101.191.124:5000/contract-service:0.0.6",
+  "name":"46.101.191.124:5000/contract-service:0.0.7",
   "cpus":0.1,
   "memory":64,
   "environment":{
     "SERVICE_CHECK_SCRIPT":"curl -s http://46.101.191.124:5011/healthcheck",
-    "CATALOG_SERVICE_URL":"http://46.101.191.124:5984",
+    "DISCOVERY_SERVICE_URLS":"http://46.101.138.192:8500;http://46.101.191.124:8500",
     "SERVICE_PORT":"5011",
     "CONTRACT_TIMEOUT":"3600000",
     "RETRY_TIMEOUT":"5000",
-    "HOOK_URLS":"http://46.101.191.124:5984/contracts",
-    "LOG":"true"
+    "HOOK_URLS":"http://46.101.191.124:5984/contracts"
   },
   "hostname":"",
   "domain":"",
@@ -67,6 +66,54 @@ http://46.101.191.124:8080/api/containers?pull=true \
     "name":"no"
   }
 }'
+```
+
+###Windows
+```
+$Uri = "http://46.101.191.124:8080/api/containers?pull=true"
+
+$Headers = @{
+  "X-Service-Key" = "pdE4.JVg43HyxCEMWvsFvu6bdFV7LwA7YPii"
+  "Content-Type" = "application/json"
+}
+
+$Body = @"
+{  
+  "name":"46.101.191.124:5000/contract-service:0.0.7",
+  "cpus":0.1,
+  "memory":64,
+  "environment":{
+    "SERVICE_CHECK_SCRIPT":"curl -s http://46.101.191.124:5011/healthcheck",
+    "DISCOVERY_SERVICE_URLS":"http://46.101.138.192:8500;http://46.101.191.124:8500",
+    "SERVICE_PORT":"5011",
+    "CONTRACT_TIMEOUT":"3600000",
+    "RETRY_TIMEOUT":"5000",
+    "HOOK_URLS":"http://46.101.191.124:5984/contracts"
+  },
+  "hostname":"",
+  "domain":"",
+  "type":"service",
+  "network_mode":"bridge",
+  "links":{},
+  "volumes":[],
+  "bind_ports":[  
+    {  
+       "proto":"tcp",
+       "host_ip":null,
+       "port":5011,
+       "container_port":5011
+    }
+  ],
+  "labels":[],
+  "publish":false,
+  "privileged":false,
+  "restart_policy":{  
+    "name":"no"
+  }
+}
+"@
+
+Invoke-RestMethod -Uri $Uri -Method Post -Headers $Headers -Body $Body
 ```
 
 ##API
