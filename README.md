@@ -43,7 +43,7 @@ http://46.101.191.124:8080/api/containers?pull=true \
     "CONTRACT_TIMEOUT":"3600000",
     "RETRY_TIMEOUT":"5000",
     "HOOK_URLS":"http://46.101.191.124:5984/contracts",
-    "LOGS":"true"
+    "LOG":"true"
   },
   "hostname":"",
   "domain":"",
