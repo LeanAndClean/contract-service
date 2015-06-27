@@ -21,8 +21,8 @@ export HOOK_URLS=http://46.101.191.124:5984/contracts
 ##Publish into private registry
 
 ```
-docker tag contract-service 46.101.191.124:5000/contract-service:0.0.7
-docker push 46.101.191.124:5000/contract-service:0.0.7
+docker tag contract-service 46.101.191.124:5000/contract-service:0.0.10
+docker push 46.101.191.124:5000/contract-service:0.0.10
 ```
 
 ##Deploy via Shipyard
@@ -33,7 +33,7 @@ curl -X POST \
 -H 'X-Service-Key: pdE4.JVg43HyxCEMWvsFvu6bdFV7LwA7YPii' \
 http://46.101.191.124:8080/api/containers?pull=true \
 -d '{  
-  "name":"46.101.191.124:5000/contract-service:0.0.7",
+  "name":"46.101.191.124:5000/contract-service:0.0.10",
   "cpus":0.1,
   "memory":64,
   "environment":{
