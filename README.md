@@ -1,13 +1,21 @@
 #Contract Service
 
-##Configuration parameters
+##Service configuration
 
 ```
 export SERVICE_PORT=5011
-export CONTRACT_TIMEOUT=60000
+export CONTRACT_TIMEOUT=360000
 export RETRY_TIMEOUT=5000
 export DISCOVERY_SERVICE_URLS=http://46.101.138.192:8500,http://46.101.191.124:8500
 export HOOK_URLS=http://46.101.191.124:5984/contracts
+```
+
+##Deploy configuration
+
+```
+export SERVICE_VERSION=0.0.10
+export PUBLISH_SERVICE=<ip>:<port>
+export DEPLOY_SERVICE=<ip>:<port>
 ```
 
 ##Build
@@ -16,13 +24,13 @@ export HOOK_URLS=http://46.101.191.124:5984/contracts
 
 ##Run locally
 
-`docker run -t -i -p 5011:5011 contract-service`
+`docker run -t -i -p $SERVICE_PORT:$SERVICE_PORT contract-service`
 
 ##Publish into private registry
 
 ```
-docker tag contract-service 46.101.191.124:5000/contract-service:0.0.10
-docker push 46.101.191.124:5000/contract-service:0.0.10
+docker tag contract-service $PUBLISH_SERVICE/contract-service:$SERVICE_VERSION
+docker push $PUBLISH_SERVICE/contract-service:$SERVICE_VERSION
 ```
 
 ##Deploy via Shipyard
@@ -31,18 +39,18 @@ docker push 46.101.191.124:5000/contract-service:0.0.10
 curl -X POST \
 -H 'Content-Type: application/json' \
 -H 'X-Service-Key: pdE4.JVg43HyxCEMWvsFvu6bdFV7LwA7YPii' \
-http://46.101.191.124:8080/api/containers?pull=true \
+http://$DEPLOY_SERVICE/api/containers?pull=true \
 -d '{  
-  "name":"46.101.191.124:5000/contract-service:0.0.10",
+  "name":"'$PUBLISH_SERVICE'/contract-service:'$SERVICE_VERSION'",
   "cpus":0.1,
-  "memory":64,
+  "memory":32,
   "environment":{
-    "SERVICE_CHECK_SCRIPT":"curl -s http://46.101.191.124:5011/healthcheck",
-    "DISCOVERY_SERVICE_URLS":"http://46.101.138.192:8500,http://46.101.191.124:8500",
-    "SERVICE_PORT":"5011",
-    "CONTRACT_TIMEOUT":"3600000",
-    "RETRY_TIMEOUT":"5000",
-    "HOOK_URLS":"http://46.101.191.124:5984/contracts",
+    "SERVICE_CHECK_SCRIPT":"curl -s http://$SERVICE_CONTAINER_IP:$SERVICE_CONTAINER_PORT/healthcheck",
+    "DISCOVERY_SERVICE_URLS":"'$DISCOVERY_SERVICE_URLS'",
+    "SERVICE_PORT":"'$SERVICE_PORT'",
+    "CONTRACT_TIMEOUT":"'$CONTRACT_TIMEOUT'",
+    "RETRY_TIMEOUT":"'$RETRY_TIMEOUT'",
+    "HOOK_URLS":"'$HOOK_URLS'",
     "LOG":"true"
   },
   "hostname":"",
@@ -55,8 +63,8 @@ http://46.101.191.124:8080/api/containers?pull=true \
     {  
        "proto":"tcp",
        "host_ip":null,
-       "port":5011,
-       "container_port":5011
+       "port":'$SERVICE_PORT',
+       "container_port":'$SERVICE_PORT'
     }
   ],
   "labels":[],
@@ -77,14 +85,14 @@ http://46.101.191.124:8080/api/containers?pull=true \
 ```
 curl -X GET \
 -H 'Content-Type: application/json' \
-http://localhost:5011/contracts/abc
+http://$DEPLOY_SERVICE:$SERVICE_PORT/contracts/abc
 ```
 
 ####Add contract
 ```
 curl -X POST \
 -H 'Content-Type: application/json' \
-http://192.168.59.103:5011/contracts/abc \
+http://$DEPLOY_SERVICE:$SERVICE_PORT/contracts/abc \
 -d '{
   "cart":{
     "total":"0.666"
@@ -102,7 +110,7 @@ http://192.168.59.103:5011/contracts/abc \
 ```
 curl -X GET \
 -H 'Content-Type: application/json' \
-http://localhost:5011/replicate
+http://$DEPLOY_SERVICE:$SERVICE_PORT/replicate
 ```
 
 ###HealthCheck
@@ -110,5 +118,5 @@ http://localhost:5011/replicate
 ```
 curl -X GET \
 -H 'Content-Type: application/json' \
-http://localhost:5011/healthcheck
+http://$DEPLOY_SERVICE:$SERVICE_PORT/healthcheck
 ```
