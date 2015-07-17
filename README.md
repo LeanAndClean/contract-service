@@ -23,7 +23,7 @@ export SERVICE_VERSION=0.0.10
 ##Publish into private registry
 
 ```
-docker tag contract-service $PUBLISH_SERVICE/contract-service:$SERVICE_VERSION
+docker tag contract-service:latest $PUBLISH_SERVICE/contract-service:$SERVICE_VERSION
 docker push $PUBLISH_SERVICE/contract-service:$SERVICE_VERSION
 ```
 
